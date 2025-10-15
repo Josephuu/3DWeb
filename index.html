@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente de Impresiones 3D</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__content">
+        <h1>Gestión inteligente de pedidos de impresión 3D</h1>
+        <p>
+          Sube tu archivo STL, configura los colores con el stock disponible y
+          recibe una estimación automática de peso y costo antes de enviar tu
+          solicitud.
+        </p>
+        <label class="file-input">
+          <input type="file" id="stlInput" accept=".stl" />
+          <span>Subir archivo STL</span>
+        </label>
+      </div>
+      <div class="viewer" id="viewer"></div>
+    </header>
+
+    <main>
+      <section class="panel" id="modelInsights">
+        <h2>Datos técnicos estimados</h2>
+        <div class="metrics">
+          <article>
+            <h3>Volumen</h3>
+            <p><span id="volume">—</span> cm³</p>
+          </article>
+          <article>
+            <h3>Peso estimado</h3>
+            <p><span id="weight">—</span> g</p>
+          </article>
+          <article>
+            <h3>Costo estimado</h3>
+            <p>$ <span id="price">—</span></p>
+          </article>
+        </div>
+
+        <form class="form-grid" id="estimationForm">
+          <label>
+            Densidad del material (g/cm³)
+            <input type="number" id="density" step="0.01" value="1.24" />
+          </label>
+          <label>
+            Infill (%)
+            <input type="number" id="infill" min="0" max="100" value="20" />
+          </label>
+          <label>
+            Factor de paredes y soportes
+            <input type="number" id="shellFactor" step="0.05" value="0.35" />
+          </label>
+          <label>
+            Costo por gramo ($)
+            <input type="number" id="costPerGram" step="0.01" value="0.18" />
+          </label>
+          <label>
+            Costo fijo de servicio ($)
+            <input type="number" id="serviceFee" step="0.5" value="3" />
+          </label>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2>Plan de colores según stock</h2>
+          <button id="refreshStock" type="button">Actualizar stock</button>
+        </div>
+        <div id="stockList" class="stock-list"></div>
+
+        <div class="color-planner">
+          <h3>Seleccioná colores para tu pieza</h3>
+          <form id="colorForm">
+            <label>
+              Color disponible
+              <select id="colorSelector"></select>
+            </label>
+            <label>
+              Descripción del sector / nota
+              <input type="text" id="colorNote" placeholder="Ej: Carcasa, base, detalles" />
+            </label>
+            <button type="submit">Agregar color</button>
+          </form>
+          <ul id="colorPlan" class="color-plan"></ul>
+          <p class="hint">
+            ¿No encontrás el color que querés? Agregalo al pedido y nos pondremos
+            en contacto.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Resumen del pedido</h2>
+        <form id="requestForm" class="form-grid">
+          <label>
+            Nombre y datos de contacto
+            <input type="text" id="clientInfo" placeholder="Nombre, email o teléfono" />
+          </label>
+          <label>
+            Observaciones adicionales
+            <textarea id="additionalNotes" rows="3" placeholder="Preferencias de acabado, plazos, etc."></textarea>
+          </label>
+          <label>
+            Colores solicitados fuera de stock
+            <textarea id="customColorRequest" rows="2" placeholder="Indica colores que te gustaría conseguir"></textarea>
+          </label>
+        </form>
+        <div class="summary-actions">
+          <button type="button" id="generateSummary">Generar resumen</button>
+          <button type="button" id="copySummary">Copiar</button>
+          <button type="button" id="sendEmail">Enviar por email</button>
+        </div>
+        <pre id="summary" class="summary-output">Carga un archivo y completa los datos para generar el resumen.</pre>
+      </section>
+
+      <section class="panel admin-panel" id="adminPanel">
+        <details>
+          <summary>Panel para actualizar stock de filamentos</summary>
+          <form id="stockForm" class="form-grid">
+            <label>
+              Nombre del color
+              <input type="text" id="stockName" placeholder="Ej: Azul eléctrico" />
+            </label>
+            <label>
+              Hex del color
+              <input type="text" id="stockHex" placeholder="#0057ff" />
+            </label>
+            <label>
+              Material
+              <input type="text" id="stockMaterial" placeholder="PLA, PETG..." />
+            </label>
+            <label>
+              Cantidad disponible (g)
+              <input type="number" id="stockGrams" min="0" step="10" />
+            </label>
+            <input type="hidden" id="editingIndex" />
+            <div class="admin-actions">
+              <button type="submit">Guardar color</button>
+              <button type="button" id="resetStock">Restaurar lista inicial</button>
+            </div>
+          </form>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Hecho para simplificar tu flujo de impresión 3D. Personalizá los valores
+        para adaptarlos a tus costos reales.
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
