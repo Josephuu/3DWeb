@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Servicio de Impresión 3D</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="branding">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/010/704/543/small/3d-printer-icon-in-flat-style-illustration-vector.jpg" alt="Logo impresión 3D" />
+        <div>
+          <h1>Tu Hub de Impresión 3D</h1>
+          <p>Calcula, visualiza y solicita tus piezas personalizadas en un solo lugar.</p>
+        </div>
+      </div>
+      <nav>
+        <a href="#upload">Carga tu STL</a>
+        <a href="#filaments">Stock de Filamentos</a>
+        <a href="#cotizacion">Estimación</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="upload" class="card">
+        <h2>1. Carga tu archivo STL</h2>
+        <p>
+          Sube tu archivo STL para visualizarlo en 3D, estimar su peso y recibir un costo aproximado.
+          El procesamiento se realiza localmente en tu navegador.
+        </p>
+        <label class="file-input">
+          <input type="file" id="stlInput" accept=".stl" />
+          <span>Seleccionar archivo STL</span>
+        </label>
+        <div id="previewContainer" class="preview">
+          <canvas id="previewCanvas"></canvas>
+          <div class="preview-placeholder">
+            <p>Tu modelo 3D aparecerá aquí una vez cargado.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="filaments" class="card">
+        <h2>2. Elige los colores disponibles</h2>
+        <p>
+          Personaliza tu pieza seleccionando un color distinto para cada componente. Si el color que
+          buscas no está en stock, solicítalo al final del formulario.
+        </p>
+        <div class="filament-actions">
+          <button id="addColorSegment" class="btn-secondary" disabled>
+            Añadir segmento de color
+          </button>
+          <button id="toggleAdmin" class="btn-link">Actualizar stock</button>
+        </div>
+        <div id="colorSegments" class="color-segments"></div>
+        <div id="noStockMessage" class="hidden info-banner warning">
+          <strong>¿No encuentras tu color?</strong> Completa el formulario de contacto e indícanos cuál
+          necesitás. Te responderemos a la brevedad.
+        </div>
+        <div id="adminPanel" class="admin-panel hidden">
+          <h3>Panel rápido de stock</h3>
+          <form id="addFilamentForm">
+            <input type="text" id="filamentName" placeholder="Nombre del color" required />
+            <input type="color" id="filamentHex" value="#ff6600" />
+            <input
+              type="number"
+              id="filamentStock"
+              placeholder="Rollos disponibles"
+              min="0"
+              required
+            />
+            <button type="submit" class="btn-primary">Agregar/Actualizar</button>
+          </form>
+          <ul id="filamentList"></ul>
+        </div>
+      </section>
+
+      <section id="cotizacion" class="card">
+        <h2>3. Estimación instantánea</h2>
+        <div class="estimacion-grid">
+          <div>
+            <h3>Resultado estimado</h3>
+            <ul class="summary" id="summaryList"></ul>
+          </div>
+          <div>
+            <h3>Configuración</h3>
+            <form id="pricingForm">
+              <label>
+                Material
+                <select id="materialSelect">
+                  <option value="PLA" selected>PLA (1.24 g/cm³)</option>
+                  <option value="PETG">PETG (1.27 g/cm³)</option>
+                  <option value="ABS">ABS (1.04 g/cm³)</option>
+                </select>
+              </label>
+              <label>
+                % de relleno estimado
+                <input type="number" id="infillInput" min="1" max="100" value="20" />
+              </label>
+              <label>
+                Costo por kilo de material (USD)
+                <input type="number" id="pricePerKg" min="1" value="25" step="0.5" />
+              </label>
+              <label>
+                Tiempo estimado de impresión (horas)
+                <input type="number" id="printTime" min="1" value="6" step="0.5" />
+              </label>
+              <label>
+                Tarifa por hora de impresión (USD)
+                <input type="number" id="hourlyRate" min="0" value="4" step="0.5" />
+              </label>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="contacto" class="card">
+        <h2>4. Enviar solicitud</h2>
+        <p>
+          Cuando estés conforme con la configuración, envía el resumen para recibir una cotización
+          formal. Puedes adjuntar la misma información en un correo o mensaje directo.
+        </p>
+        <form id="requestForm" class="request-form">
+          <label>
+            Nombre completo
+            <input type="text" id="clientName" required />
+          </label>
+          <label>
+            Correo electrónico
+            <input type="email" id="clientEmail" required />
+          </label>
+          <label>
+            Medio de contacto preferido
+            <select id="contactMethod">
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="instagram">Instagram</option>
+            </select>
+          </label>
+          <label>
+            Comentarios adicionales
+            <textarea id="additionalNotes" rows="4" placeholder="Detalles, acabados, plazos..."></textarea>
+          </label>
+          <button type="submit" class="btn-primary">Generar resumen y enviar</button>
+        </form>
+        <div id="requestFeedback" class="hidden info-banner success"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>
+        ¿Preferís enviarlo manualmente? Escríbenos a
+        <a href="mailto:impresiones@tuhub3d.com">impresiones@tuhub3d.com</a> o mándanos un mensaje al
+        <a href="https://wa.me/5491122334455" target="_blank" rel="noopener">WhatsApp</a>.
+      </p>
+      <p>Hecho con ♥ para makers y emprendedores.</p>
+    </footer>
+
+    <template id="colorSegmentTemplate">
+      <div class="color-segment">
+        <label>
+          Nombre del segmento
+          <input type="text" class="segment-name" placeholder="Cuerpo, detalles, soporte..." />
+        </label>
+        <label>
+          Color
+          <select class="segment-color"></select>
+        </label>
+        <button class="remove-segment" type="button" aria-label="Eliminar segmento">×</button>
+      </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/controls/OrbitControls.js"></script>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
