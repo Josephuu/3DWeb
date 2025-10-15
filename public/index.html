@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STL Craftsman Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🛠️</div>
+        <div>
+          <h1>STL Craftsman Hub</h1>
+          <p>Tu tablero integral para cotizar y gestionar impresiones 3D.</p>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a class="active" href="#upload-panel">Cotizador</a>
+        <a href="#request-help">Colores especiales</a>
+        <a href="#order-tracker">Pipeline</a>
+      </nav>
+      <section class="inventory-widget">
+        <h2>Stock actual</h2>
+        <p>Mostrá a tus clientes qué colores pueden pedir hoy mismo.</p>
+        <ul id="inventory-summary" class="inventory-list"></ul>
+        <button id="toggle-stock-panel" class="primary ghost">Administrar stock</button>
+      </section>
+      <section class="help-widget">
+        <h2>Consejo rápido</h2>
+        <p>Actualizá tu inventario cada vez que abras un rollo nuevo para que las estimaciones sean precisas.</p>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-header">
+        <div>
+          <h2>Configura una nueva impresión</h2>
+          <p>Cargá un STL, distribuí colores y compartí la cotización en segundos.</p>
+        </div>
+        <div class="workspace-actions">
+          <button id="copy-summary" class="secondary">Copiar resumen</button>
+          <a id="mailto-link" class="primary" href="#" target="_blank" rel="noopener">Enviar solicitud</a>
+        </div>
+      </header>
+
+      <section class="cards-grid">
+        <article class="card preview" id="upload-panel">
+          <header>
+            <h3>1. Carga y vista previa</h3>
+            <span class="tag">STL</span>
+          </header>
+          <label for="stl-input" class="upload-box">
+            <span>Arrastrá y soltá tu archivo STL o hacé clic para seleccionarlo</span>
+            <input type="file" id="stl-input" accept=".stl" />
+          </label>
+          <div id="preview-container">
+            <canvas id="preview-canvas"></canvas>
+            <div id="preview-hint">Esperando un archivo STL…</div>
+          </div>
+          <div class="info-grid" id="geometry-info">
+            <div>
+              <span class="label">Volumen bruto</span>
+              <span id="volume-value">-</span>
+            </div>
+            <div>
+              <span class="label">Dimensiones (XYZ)</span>
+              <span id="dimensions-value">-</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card config" id="configuration-panel">
+          <header>
+            <h3>2. Configuración de impresión</h3>
+            <span class="tag secondary">Parámetros</span>
+          </header>
+          <div class="config-grid">
+            <label>
+              <span>Porcentaje de relleno</span>
+              <input type="range" id="infill-input" min="5" max="100" value="20" />
+              <span class="range-value"><span id="infill-display">20</span>%</span>
+            </label>
+            <label>
+              <span>Capas exteriores extra</span>
+              <input type="number" id="shell-input" min="1" max="6" value="2" />
+            </label>
+            <label>
+              <span>Densidad del material (g/cm³)</span>
+              <input type="number" id="density-input" min="0.5" max="1.5" step="0.01" value="1.24" />
+            </label>
+          </div>
+          <div class="color-selector">
+            <div class="selector-header">
+              <h4>Distribución de colores</h4>
+              <p>Repartí el porcentaje aproximado de uso para cada color. El total debe sumar 100%.</p>
+            </div>
+            <div id="color-rows"></div>
+            <div class="color-actions">
+              <button id="add-color" class="secondary">Agregar color</button>
+              <span id="color-total">Total: 0%</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card quote" id="results-panel">
+          <header>
+            <h3>3. Estimación</h3>
+            <span class="tag success">Resumen</span>
+          </header>
+          <div class="info-grid">
+            <div>
+              <span class="label">Peso estimado</span>
+              <span id="weight-value">-</span>
+            </div>
+            <div>
+              <span class="label">Costo estimado</span>
+              <span id="cost-value">-</span>
+            </div>
+            <div>
+              <span class="label">Tiempo estimado</span>
+              <span id="time-value">-</span>
+            </div>
+          </div>
+          <textarea id="quote-summary" readonly></textarea>
+        </article>
+      </section>
+
+      <section class="cards-grid wide">
+        <article class="card" id="request-help">
+          <header>
+            <h3>¿No encontrás el color que necesitás?</h3>
+            <span class="tag warning">Pedidos especiales</span>
+          </header>
+          <p>Mandanos un mensaje y te avisamos cuando lo repongamos o coordinamos un pedido especial.</p>
+          <form id="custom-color-form">
+            <label>
+              Color deseado
+              <input type="text" id="desired-color" required />
+            </label>
+            <label>
+              Método de contacto
+              <select id="contact-method" required>
+                <option value="email">Email</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="instagram">Instagram DM</option>
+              </select>
+            </label>
+            <label>
+              Datos de contacto
+              <input type="text" id="contact-value" required />
+            </label>
+            <label>
+              Comentarios
+              <textarea id="contact-notes" rows="3" placeholder="Contanos más sobre tu proyecto"></textarea>
+            </label>
+            <button type="submit" class="primary">Enviar consulta</button>
+            <p id="custom-color-feedback" role="status"></p>
+          </form>
+        </article>
+
+        <article class="card pipeline" id="order-tracker">
+          <header>
+            <h3>Pipeline de pedidos</h3>
+            <span class="tag neutral">Vista rápida</span>
+          </header>
+          <p>Usá esta sección como checklist para tus trabajos en curso.</p>
+          <ul class="pipeline-list">
+            <li>
+              <span class="status in-review">En revisión</span>
+              <div>
+                <strong>Mate para café</strong>
+                <p>Cliente: Tomás — Esperando confirmación de color.</p>
+              </div>
+            </li>
+            <li>
+              <span class="status printing">Imprimiendo</span>
+              <div>
+                <strong>Figura articulada</strong>
+                <p>Cliente: Camila — 12h restantes.</p>
+              </div>
+            </li>
+            <li>
+              <span class="status ready">Listo para retirar</span>
+              <div>
+                <strong>Soporte de monitor</strong>
+                <p>Cliente: Martín — Coordinando envío.</p>
+              </div>
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <footer class="workspace-footer">
+        <small>Los cálculos son estimaciones. Confirmaremos los detalles por mensaje antes de avanzar.</small>
+      </footer>
+    </main>
+  </div>
+
+  <div id="stock-overlay" class="stock-overlay hidden">
+    <div class="overlay-backdrop" data-close="true"></div>
+    <section class="card stock-modal" id="stock-panel" role="dialog" aria-modal="true" tabindex="-1">
+      <div class="panel-header">
+        <div>
+          <h2>Stock de filamentos</h2>
+          <p>Actualizá el inventario para que tus clientes vean la disponibilidad en tiempo real. Los datos se guardan en tu navegador.</p>
+        </div>
+        <button id="close-stock" class="icon-button" aria-label="Cerrar">✕</button>
+      </div>
+      <table id="stock-table">
+        <thead>
+          <tr>
+            <th>Color</th>
+            <th>Disponible (g)</th>
+            <th>Precio / kg</th>
+            <th>Hex</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button id="add-stock" class="secondary">Agregar color al inventario</button>
+    </section>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
